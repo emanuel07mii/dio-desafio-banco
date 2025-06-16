@@ -1,8 +1,13 @@
 from datetime import datetime
 from abc import ABC, abstractmethod
 
+class Historico:
+    def __init__(self, transacao):
+        self.transacoes = []
+        self.transacoes.append(transacao)
+
 class Conta(ABC):
-    def __init__(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato=""):
+    def __init__(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato=None, numero_saques=0, limite_saques=0, tipo_conta="Conta Corrente"):
         self.agencia = agencia
         self.numero = numero
         self.cliente = cliente # classe Cliente
@@ -17,8 +22,8 @@ class Conta(ABC):
     
     @classmethod
     @abstractmethod
-    def nova_conta(cls, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato="", numero_saques=0, limite_saques=3):
-        pass
+    def nova_conta(cls, agencia, numero, cliente, saldo=0.0, extrato=""):
+        return Conta(agencia, numero, cliente, saldo, extrato)
     
     @abstractmethod
     def sacar(self, valor):
@@ -37,7 +42,7 @@ class Conta(ABC):
         pass
 
 class ContaCorrente(Conta):
-    def __init__(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato=None, numero_saques=0, limite_saques=3):
+    def __init__(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato=None, numero_saques=0, limite_saques=5):
         super().__init__(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques)
         self.tipo_conta = "Conta Corrente"
         self.numero_saques = numero_saques
@@ -47,8 +52,8 @@ class ContaCorrente(Conta):
         return self.saldo
     
     @classmethod
-    def nova_conta(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato="", numero_saques=0, limite_saques=3):
-        return Conta(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques)
+    def nova_conta(cls, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato="", numero_saques=0, limite_saques=5, tipo_conta="Conta Corrente"):
+        return Conta(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques, tipo_conta)
     
     def sacar(self, valor):
         if self.numero_saques >= self.limite_saques:
@@ -84,7 +89,7 @@ class ContaCorrente(Conta):
         return True
 
 class ContaPoupanca(Conta):
-    def __init__(self, agencia, numero, cliente, saldo=0, limite_saque=300, extrato="", numero_saques=0, limite_saques=5):
+    def __init__(self, agencia, numero, cliente, saldo=0, limite_saque=300, extrato="", numero_saques=0, limite_saques=3):
         super().__init__(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques)
         self.tipo_conta = "Conta Poupança"
         self.numero_saques = numero_saques
@@ -94,8 +99,8 @@ class ContaPoupanca(Conta):
         return self.saldo
     
     @classmethod
-    def nova_conta(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato="", numero_saques=0, limite_saques=3):
-        return Conta(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques)
+    def nova_conta(cls, agencia, numero, cliente, saldo=0.0, limite_saque=300.0, extrato="", numero_saques=0, limite_saques=3, tipo_conta="Conta Poupança"):
+        return Conta(agencia, numero, cliente, saldo, limite_saque, extrato, numero_saques, limite_saques, tipo_conta)
     
     def sacar(self, valor):
         if self.numero_saques >= self.limite_saques:
@@ -133,6 +138,10 @@ class ContaPoupanca(Conta):
 class Transaction(ABC): #classe abstrata interface
     @abstractmethod
     def realizar_transacao(self, conta):
+        pass
+
+    @abstractmethod
+    def registrar(self, conta):
         pass
 
 class Depositar(Transaction):
