@@ -106,7 +106,7 @@ class Conta(ABC):
     def exibir_extrato(self):
         self.extrato.exibir_extrato()
         print(f"Titular: {self.cliente.nome} Nº{self.tipo_conta}: {self.numero} AG: {self.agencia}")
-        print(f"Saldo atual: R${self.saldo:.2f}")
+        print(f"Saldo atual: R${self.saldo:.2f} L de saque: R${self.limite_saque:.2f} Nº Saques: {self.numero_saques}")
         print(60 * "-")
 
 class ContaCorrente(Conta):
