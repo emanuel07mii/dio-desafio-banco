@@ -1,5 +1,16 @@
 from datetime import datetime
 from abc import ABC, abstractmethod
+from functools import wraps
+
+def data_hora_formatada(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return f"{datetime.now().strftime('%d/%m/%Y')} às {datetime.now().strftime('%H:%M:%S')}"
+    return wrapper
+
+@data_hora_formatada
+def data_atual():
+    pass
 
 class Transacao(ABC): #classe abstrata interface
 
@@ -70,7 +81,7 @@ class Historico:
         for transacao in self.transacoes:
             print(transacao)
         print('-' * 60)
-        print(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        print(f"Data: {data_atual()}")
 
 class Conta(ABC):
     def __init__(self, agencia, numero, cliente, saldo=0.0, limite_saque=500.0, extrato=None, numero_saques=0, limite_saques=0, tipo_conta="Conta Corrente"):
@@ -79,7 +90,7 @@ class Conta(ABC):
         self.cliente = cliente # classe Cliente
         self.saldo = saldo
         self.extrato = Historico() # classe extrato Historico
-        self.data_criacao = datetime.now()
+        self.data_criacao = data_atual()
         self.status = True  # Ativo por padrão
     
     @classmethod
@@ -96,7 +107,7 @@ class Conta(ABC):
             print("Valor inválido para depósito.")
             return False
         self.saldo += valor
-        self.extrato.adicionar_transacao(f"Depósito: R${valor:.2f} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        self.extrato.adicionar_transacao(f"Depósito: R${valor:.2f} - {data_atual()}")
         print(f"Depósito de R${valor:.2f} realizado com sucesso.")
         return True
     
@@ -131,7 +142,7 @@ class ContaCorrente(Conta):
 
         self.saldo -= valor
         self.numero_saques += 1
-        self.extrato.adicionar_transacao(f"Saque: R${valor:.2f} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        self.extrato.adicionar_transacao(f"Saque: R${valor:.2f} - {data_atual()}")
         print(f"Saque de R${valor:.2f} realizado com sucesso.")
         return True
     
@@ -145,7 +156,7 @@ class ContaCorrente(Conta):
 
         self.saldo -= valor
         conta_destino.saldo += valor
-        self.extrato.append(f"Transferência: R${valor:.2f} para {conta_destino.numero} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
+        self.extrato.append(f"Transferência: R${valor:.2f} para {conta_destino.numero} - {data_atual()}\n")
         print(f"Transferência de R${valor:.2f} realizada com sucesso.")
         return True
 
@@ -172,7 +183,7 @@ class ContaPoupanca(Conta):
         self.saldo -= valor
         self.numero_saques += 1
         print(f"Saque de R${valor:.2f} realizado com sucesso.")
-        self.extrato.adicionar_transacao(f"Saque: R${valor:.2f} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        self.extrato.adicionar_transacao(f"Saque: R${valor:.2f} - {data_atual()}")
         return True
     
     def transferir(self, valor, conta_destino):
@@ -185,12 +196,12 @@ class ContaPoupanca(Conta):
         
         if self.sacar(valor):
             conta_destino.depositar(valor)
-            self.extrato.adicionar_transacao(f"Transferência: R${valor:.2f} para {conta_destino.numero} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+            self.extrato.adicionar_transacao(f"Transferência: R${valor:.2f} para {conta_destino.nome} Nª da conta:{conta_destino.numero} - {data_atual()}")
             print(f"Transferência de R${valor:.2f} realizada com sucesso para {conta_destino.nome}.")
             return True
 
         self.saldo -= valor
         conta_destino.saldo += valor
-        self.extrato.append(f"Transferência: R${valor:.2f} para {conta_destino.numero} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
-        print(f"Transferência de R${valor:.2f} realizada com sucesso.")
+        self.extrato.adicionar_transacao(f"Transferência: R${valor:.2f} para {conta_destino.nome} Nª da conta:{conta_destino.numero} - {data_atual}")
+        print(f"Transferência de R${valor:.2f} realizada com sucesso para {conta_destino.nome}.")
         return True
