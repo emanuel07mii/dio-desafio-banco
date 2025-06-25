@@ -25,29 +25,12 @@ class Deposito(Transacao):
     def registrar(self, conta):
         return conta.depositar(self.valor)
 
-    # def realizar_transacao(self, conta):
-    #     if conta.depositar(self.valor):
-    #         transacao = f"Depósito: R${self.valor:.2f} - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-    #         self.registrar(transacao)
-
-    #     conta.saldo += self.valor
-    #     print(f"Depósito de R${self.valor:.2f} realizado com sucesso.")
-
 class Saque(Transacao):
     def __init__(self, valor):
         self.valor = valor
     
     def registrar(self, conta):
         return conta.sacar(self.valor)
-
-    # def realizar_transacao(self, conta):
-    #     if conta.saldo >= self.valor:
-    #         conta.saldo -= self.valor
-    #         print(f"Saque de R${self.valor:.2f} realizado com sucesso.")
-    #         return True
-    #     else:
-    #         print("Saldo insuficiente.")
-    #         return False
 
 class Transferir(Transacao):
     def __init__(self, valor, conta_destino):
@@ -57,28 +40,37 @@ class Transferir(Transacao):
     def resistrar(self, conta_origem):
         return conta_origem.transferir(self.valor, self.conta_destino)
 
-    # def realizar_transacao(self, conta_origem):
-    #     if conta_origem.saldo >= self.valor:
-    #         conta_origem.saldo -= self.valor
-    #         self.conta_destino.saldo += self.valor
-    #         print(f"Transferência de R${self.valor:.2f} realizada com sucesso.")
-    #     else:
-    #         print("Saldo insuficiente para transferência.")
+def filtrar_cliente(cpf, clientes):
+    clientes_filtrados = [cliente for cliente in clientes if cliente.cpf == cpf]
+    return clientes_filtrados[0] if clientes_filtrados else None
+
+
+def recuperar_conta_cliente(cliente):
+    if not cliente.contas:
+        print("\n@@@ Cliente não possui conta! @@@")
+        return
+
+    # FIXME: não permite cliente escolher a conta
+    return cliente.contas[0]
 
 class Historico:
     def __init__(self):
-        self.transacoes = []
+        self._transacoes = []
+
+    @property
+    def transacoes(self):
+        return self._transacoes
 
     def adicionar_transacao(self, transacao):
-        self.transacoes.append(transacao)
+        self._transacoes.append(transacao)
     
     def exibir_extrato(self):
-        if not self.transacoes:
+        if not self._transacoes:
             print("Nenhuma transação realizada.")
             return
         print("Extrato - Histórico de Transações")
         print('-' * 60)
-        for transacao in self.transacoes:
+        for transacao in self._transacoes:
             print(transacao)
         print('-' * 60)
         print(f"Data: {data_atual()}")
