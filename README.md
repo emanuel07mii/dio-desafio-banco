@@ -1,7 +1,7 @@
 # 🔍 Desafio prático
 Criando um sistema bancário com Python
 
-## 🏦 Objetivo
+<!-- ## 🏦 Objetivo
 Nessa primeira etapa temos que criar um sistema bancário com as operações: sacar, depositar e visualizar extrato.
 
 ### ⚙️💵 1.Operação de depósito
@@ -37,7 +37,7 @@ python desafio.py
 ou
 ```bash
 python3 desafio.py
-```
+``` -->
 
 ## 📚 Referências
 
