@@ -1,6 +1,6 @@
 import textwrap
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, UTC
 import os
 import csv
 from pathlib import Path
@@ -171,7 +171,7 @@ class Historico:
             {
                 "tipo": transacao.__class__.__name__,
                 "valor": transacao.valor,
-                "data": datetime.utcnow().strftime("%d-%m-%Y %H:%M:%S"),
+                "data": datetime.now(UTC).strftime("%d-%m-%Y %H:%M:%S"),
             }
         )
 
@@ -181,7 +181,7 @@ class Historico:
                 yield transacao
 
     def transacoes_do_dia(self):
-        data_atual = datetime.utcnow().date()
+        data_atual = datetime.now(UTC).date()
         transacoes = []
         for transacao in self._transacoes:
             data_transacao = datetime.strptime(transacao["data"], "%d-%m-%Y %H:%M:%S").date()
@@ -234,7 +234,7 @@ class Deposito(Transacao):
 def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
-        data_hora = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        data_hora = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
         with open(ROOT_PATH / "log.txt", "a") as arquivo:
             arquivo.write(
                 f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}. "
@@ -368,7 +368,7 @@ def criar_conta(numero_conta, clientes, contas):
         print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
         return
 
-    conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta, limite=500, limite_saques=50)
+    conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta, limite=500, limite_saques=3)
     contas.append(conta)
     cliente.contas.append(conta)
 
@@ -395,9 +395,9 @@ def salvar_dados_csv(clientes, contas):
 
     with open(CONTAS_CSV, mode="w", newline='', encoding='utf-8') as arq_contas:
         writer = csv.writer(arq_contas)
-        writer.writerow(["numero", "cpf_cliente", "limite", "limite_saques"])
+        writer.writerow(["numero", "cpf_cliente", "limite", "limite_saques", "saldo"])
         for conta in contas:
-            writer.writerow([conta.numero, conta.cliente.cpf, conta._limite, conta._limite_saques])
+            writer.writerow([conta.numero, conta.cliente.cpf, conta._limite, conta._limite_saques, conta.saldo])
 
 # Carregar os dados de clientes e contas
 
@@ -427,8 +427,9 @@ def carregar_dados_csv():
                         numero=int(row["numero"]),
                         cliente=cliente,
                         limite=float(row["limite"]),
-                        limite_saques=int(row["limite_saques"])
+                        limite_saques=int(row["limite_saques"]),
                     )
+                    conta._saldo = float(row.get("saldo", 0))
                     contas.append(conta)
                     cliente.contas.append(conta)
 
