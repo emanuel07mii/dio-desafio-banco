@@ -1,0 +1,11 @@
+[2025-06-27 19:36:01] Função 'criar_cliente' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>],) e {}. Retornou None
+[2025-06-27 19:36:03] Função 'criar_cliente' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:03] Função 'criar_conta' executada com argumentos (1, [<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>], [<ContaCorrente: ('0001', '1', 'João Silva')>]) e {}. Retornou None
+[2025-06-27 19:36:05] Função 'criar_conta' executada com argumentos (2, [<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>], [<ContaCorrente: ('0001', '1', 'João Silva')>, <ContaCorrente: ('0001', '2', 'Maria Souza')>]) e {}. Retornou None
+[2025-06-27 19:36:05] Função 'depositar' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:07] Função 'depositar' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:07] Função 'sacar' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:09] Função 'sacar' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:09] Função 'sacar' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:11] Função 'exibir_extrato' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
+[2025-06-27 19:36:13] Função 'exibir_extrato' executada com argumentos ([<PessoaFisica: ('João Silva', '11111111111')>, <PessoaFisica: ('Maria Souza', '22222222222')>],) e {}. Retornou None
