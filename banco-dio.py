@@ -1,7 +1,11 @@
 import textwrap
-from abc import ABC, abstractclassmethod, abstractproperty
+from abc import ABC, abstractmethod
 from datetime import datetime
+import os
+import csv
+from pathlib import Path
 
+ROOT_PATH = Path(__file__).parent
 
 class ContasIterador:
     def __init__(self, contas):
@@ -51,7 +55,7 @@ class PessoaFisica(Cliente):
         self.cpf = cpf
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: ('{self.cpf}')>"
+        return f"<{self.__class__.__name__}: ('{self.nome}', '{self.cpf}')>"
 
 
 class Conta:
@@ -188,11 +192,11 @@ class Historico:
 
 class Transacao(ABC):
     @property
-    @abstractproperty
+    @abstractmethod
     def valor(self):
         pass
 
-    @abstractclassmethod
+    @abstractmethod
     def registrar(self, conta):
         pass
 
@@ -230,10 +234,12 @@ class Deposito(Transacao):
 def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
-        data_hora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # TODO: alterar a implementação para salvar em arquivo.
-        # f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}. Retornou {result}\n"
-        print(f"{data_hora}: {func.__name__.upper()}")
+        data_hora = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        with open(ROOT_PATH / "log.txt", "a") as arquivo:
+            arquivo.write(
+                f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}. "
+                f"Retornou {resultado}\n"
+            )
         return resultado
 
     return envelope
@@ -374,10 +380,63 @@ def listar_contas(contas):
         print("=" * 100)
         print(textwrap.dedent(str(conta)))
 
+# Salvando dados de clientes e contas em arquivo CSV
 
-def main():
+CLIENTES_CSV = "clientes.csv"
+CONTAS_CSV = "contas.csv"
+
+
+def salvar_dados_csv(clientes, contas):
+    with open(CLIENTES_CSV, mode="w", newline='', encoding='utf-8') as arq_clientes:
+        writer = csv.writer(arq_clientes)
+        writer.writerow(["nome", "data_nascimento", "cpf", "endereco"])
+        for cliente in clientes:
+            writer.writerow([cliente.nome, cliente.data_nascimento, cliente.cpf, cliente.endereco])
+
+    with open(CONTAS_CSV, mode="w", newline='', encoding='utf-8') as arq_contas:
+        writer = csv.writer(arq_contas)
+        writer.writerow(["numero", "cpf_cliente", "limite", "limite_saques"])
+        for conta in contas:
+            writer.writerow([conta.numero, conta.cliente.cpf, conta._limite, conta._limite_saques])
+
+# Carregar os dados de clientes e contas
+
+def carregar_dados_csv():
     clientes = []
     contas = []
+
+    if os.path.exists(CLIENTES_CSV):
+        with open(CLIENTES_CSV, mode="r", newline='', encoding='utf-8') as arq_clientes:
+            reader = csv.DictReader(arq_clientes)
+            for row in reader:
+                cliente = PessoaFisica(
+                    nome=row["nome"],
+                    data_nascimento=row["data_nascimento"],
+                    cpf=row["cpf"],
+                    endereco=row["endereco"],
+                )
+                clientes.append(cliente)
+
+    if os.path.exists(CONTAS_CSV):
+        with open(CONTAS_CSV, mode="r", newline='', encoding='utf-8') as arq_contas:
+            reader = csv.DictReader(arq_contas)
+            for row in reader:
+                cliente = filtrar_cliente(row["cpf_cliente"], clientes)
+                if cliente:
+                    conta = ContaCorrente(
+                        numero=int(row["numero"]),
+                        cliente=cliente,
+                        limite=float(row["limite"]),
+                        limite_saques=int(row["limite_saques"])
+                    )
+                    contas.append(conta)
+                    cliente.contas.append(conta)
+
+    return clientes, contas
+
+
+def main():
+    clientes, contas = carregar_dados_csv()
 
     while True:
         opcao = menu()
@@ -393,15 +452,19 @@ def main():
 
         elif opcao == "nu":
             criar_cliente(clientes)
+            salvar_dados_csv(clientes, contas)
 
         elif opcao == "nc":
             numero_conta = len(contas) + 1
             criar_conta(numero_conta, clientes, contas)
+            salvar_dados_csv(clientes, contas)
 
         elif opcao == "lc":
             listar_contas(contas)
 
         elif opcao == "q":
+            salvar_dados_csv(clientes, contas)
+            print("Dados salvos. Saindo do sistema...")
             break
 
         else:
