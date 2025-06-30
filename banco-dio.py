@@ -1,11 +1,12 @@
+import csv
+import os
 import textwrap
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC
-import os
-import csv
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT_PATH = Path(__file__).parent
+
 
 class ContasIterador:
     def __init__(self, contas):
@@ -130,7 +131,11 @@ class ContaCorrente(Conta):
 
     def sacar(self, valor):
         numero_saques = len(
-            [transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__]
+            [
+                transacao
+                for transacao in self.historico.transacoes
+                if transacao["tipo"] == Saque.__name__
+            ]
         )
 
         excedeu_limite = valor > self._limite
@@ -177,14 +182,19 @@ class Historico:
 
     def gerar_relatorio(self, tipo_transacao=None):
         for transacao in self._transacoes:
-            if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
+            if (
+                tipo_transacao is None
+                or transacao["tipo"].lower() == tipo_transacao.lower()
+            ):
                 yield transacao
 
     def transacoes_do_dia(self):
         data_atual = datetime.now(UTC).date()
         transacoes = []
         for transacao in self._transacoes:
-            data_transacao = datetime.strptime(transacao["data"], "%d-%m-%Y %H:%M:%S").date()
+            data_transacao = datetime.strptime(
+                transacao["data"], "%d-%m-%Y %H:%M:%S"
+            ).date()
             if data_atual == data_transacao:
                 transacoes.append(transacao)
         return transacoes
@@ -350,9 +360,13 @@ def criar_cliente(clientes):
 
     nome = input("Informe o nome completo: ")
     data_nascimento = input("Informe a data de nascimento (dd-mm-aaaa): ")
-    endereco = input("Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ")
+    endereco = input(
+        "Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): "
+    )
 
-    cliente = PessoaFisica(nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco)
+    cliente = PessoaFisica(
+        nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco
+    )
 
     clientes.append(cliente)
 
@@ -368,7 +382,9 @@ def criar_conta(numero_conta, clientes, contas):
         print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
         return
 
-    conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta, limite=500, limite_saques=3)
+    conta = ContaCorrente.nova_conta(
+        cliente=cliente, numero=numero_conta, limite=500, limite_saques=3
+    )
     contas.append(conta)
     cliente.contas.append(conta)
 
@@ -380,6 +396,7 @@ def listar_contas(contas):
         print("=" * 100)
         print(textwrap.dedent(str(conta)))
 
+
 # Salvando dados de clientes e contas em arquivo CSV
 
 CLIENTES_CSV = "clientes.csv"
@@ -387,26 +404,38 @@ CONTAS_CSV = "contas.csv"
 
 
 def salvar_dados_csv(clientes, contas):
-    with open(CLIENTES_CSV, mode="w", newline='', encoding='utf-8') as arq_clientes:
+    with open(CLIENTES_CSV, mode="w", newline="", encoding="utf-8") as arq_clientes:
         writer = csv.writer(arq_clientes)
         writer.writerow(["nome", "data_nascimento", "cpf", "endereco"])
         for cliente in clientes:
-            writer.writerow([cliente.nome, cliente.data_nascimento, cliente.cpf, cliente.endereco])
+            writer.writerow(
+                [cliente.nome, cliente.data_nascimento, cliente.cpf, cliente.endereco]
+            )
 
-    with open(CONTAS_CSV, mode="w", newline='', encoding='utf-8') as arq_contas:
+    with open(CONTAS_CSV, mode="w", newline="", encoding="utf-8") as arq_contas:
         writer = csv.writer(arq_contas)
         writer.writerow(["numero", "cpf_cliente", "limite", "limite_saques", "saldo"])
         for conta in contas:
-            writer.writerow([conta.numero, conta.cliente.cpf, conta._limite, conta._limite_saques, conta.saldo])
+            writer.writerow(
+                [
+                    conta.numero,
+                    conta.cliente.cpf,
+                    conta._limite,
+                    conta._limite_saques,
+                    conta.saldo,
+                ]
+            )
+
 
 # Carregar os dados de clientes e contas
+
 
 def carregar_dados_csv():
     clientes = []
     contas = []
 
     if os.path.exists(CLIENTES_CSV):
-        with open(CLIENTES_CSV, mode="r", newline='', encoding='utf-8') as arq_clientes:
+        with open(CLIENTES_CSV, mode="r", newline="", encoding="utf-8") as arq_clientes:
             reader = csv.DictReader(arq_clientes)
             for row in reader:
                 cliente = PessoaFisica(
@@ -418,7 +447,7 @@ def carregar_dados_csv():
                 clientes.append(cliente)
 
     if os.path.exists(CONTAS_CSV):
-        with open(CONTAS_CSV, mode="r", newline='', encoding='utf-8') as arq_contas:
+        with open(CONTAS_CSV, mode="r", newline="", encoding="utf-8") as arq_contas:
             reader = csv.DictReader(arq_contas)
             for row in reader:
                 cliente = filtrar_cliente(row["cpf_cliente"], clientes)
@@ -469,7 +498,9 @@ def main():
             break
 
         else:
-            print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
+            print(
+                "\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@"
+            )
 
 
 main()
